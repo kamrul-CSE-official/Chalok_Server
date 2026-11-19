@@ -1,0 +1,38 @@
+model Garage {
+    id     String @id @default(uuid())
+    nameBn String @db.VarChar(225)
+    nameEn String @db.VarChar(225)
+
+    // Optional but useful identifiers
+    slug        String  @unique @db.VarChar(225) // URL-friendly unique key, e.g. "dhaka-motors"
+    code        String? @unique @db.VarChar(50) // human-readable code, e.g. "GRG-001"
+    phone       String? @db.VarChar(30) // contact number
+    email       String? @db.VarChar(225) // contact email
+    description String? @db.Text // longer description
+
+    logoUrl   String  @db.Text
+    location  String  @db.Text
+    address   String? @db.Text // structured address (optional, if location is short)
+    latitude  Float? // for maps
+    longitude Float?
+
+    isActive   Boolean @default(true)
+    isVerified Boolean @default(false) 
+    sortOrder  Int     @default(0)
+
+    // Audit fields
+    enterById   String
+    enterBy     User   @relation("GarageEnterBy", fields: [enterById], references: [id], onDelete: Restrict)
+    updatedById String
+    updatedBy   User   @relation("GarageUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime? // soft delete
+
+    @@index([enterById])
+    @@index([updatedById])
+    @@index([isActive, sortOrder]) 
+    @@index([slug])
+    @@map("garages") 
+}

@@ -1,0 +1,20 @@
+model VehicleType {
+    id        String  @id @default(uuid())
+    nameBn    String  @db.VarChar(225)
+    nameEn    String  @db.VarChar(225)
+    iconKey   String  @db.Text
+    isActive  Boolean @default(true)
+    sortOrder Int     @default(0)
+
+    enterById   String
+    enterBy     User   @relation("VehicleTypeEnterBy", fields: [enterById], references: [id], onDelete: Restrict)
+    updatedById String
+    updatedBy   User   @relation("VehicleTypeUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([enterById])
+    @@index([updatedById])
+    @@map("vehicle_types")
+}

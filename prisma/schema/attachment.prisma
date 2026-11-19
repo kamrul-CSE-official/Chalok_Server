@@ -1,0 +1,59 @@
+model Attachment {
+    id String @id @default(uuid())
+
+    // What this file belongs to (polymorphic link)
+    entityType String @db.VarChar(50) // e.g. "DRIVER", "GARAGE", "VEHICLE"
+    entityId   String @db.VarChar(50) // the parent record's id (uuid)
+
+    // File identity
+    kind      AttachmentKind @default(OTHER) // NID_FRONT, NID_BACK, LICENSE, PHOTO, etc.
+    fileKey   String         @unique @db.Text // S3/MinIO object key (source of truth)
+    fileUrl   String?        @db.Text // optional public/CDN URL (or generate on read)
+    fileName  String?        @db.VarChar(255) // original filename
+    mimeType  String?        @db.VarChar(100) // e.g. image/jpeg, application/pdf
+    sizeBytes Int? // file size in bytes
+    width     Int? // for images
+    height    Int? // for images
+
+    // Processing / moderation
+    status    AttachmentStatus @default(PENDING) // upload + verification state
+    isPublic  Boolean          @default(false) // visibility
+    sortOrder Int              @default(0)
+    checksum  String?          @db.VarChar(128) // sha256 for dedupe/integrity
+
+    // Audit
+    uploadedById String
+    uploadedBy   User   @relation("AttachmentUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime? // soft delete
+
+    @@index([entityType, entityId]) // fetch all files for a parent
+    @@index([entityType, entityId, kind])
+    @@index([uploadedById])
+    @@index([status])
+    @@map("attachments")
+}
+
+enum AttachmentKind {
+    PHOTO
+    NID_FRONT
+    NID_BACK
+    LICENSE_FRONT
+    LICENSE_BACK
+    REGISTRATION
+    INSURANCE
+    TAX_TOKEN
+    BANK_STATEMENT
+    CONTRACT
+    OTHER
+}
+
+enum AttachmentStatus {
+    PENDING // upload started, not confirmed
+    UPLOADED // file stored, awaiting review
+    VERIFIED // admin/OCR approved
+    REJECTED // failed verification
+    DELETED // soft-deleted by user/admin
+}

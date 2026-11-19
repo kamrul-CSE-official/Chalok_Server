@@ -1,0 +1,76 @@
+model Driver {
+    id     String @id @default(uuid())
+    nameBn String @db.VarChar(225)
+    nameEn String @db.VarChar(225)
+
+    // Identifiers / contact
+    phone String  @db.VarChar(30)
+    email String? @db.VarChar(225)
+
+    // NID (Bangladesh)
+    nidNumber   String? @unique @db.VarChar(50) // NID number
+    nidFrontUrl String? @db.Text // NID front image
+    nidBackUrl  String? @db.Text // NID back image
+
+    // Driving licence
+    licenseNo       String?   @db.VarChar(50)
+    licenseExpiry   DateTime?
+    licenseFrontUrl String?   @db.Text // licence front image
+    licenseBackUrl  String?   @db.Text // licence back image
+
+    // Personal details
+    dateOfBirth DateTime?
+    gender      String?   @db.VarChar(20)
+    photoUrl    String?   @db.Text // profile photo
+    address     String?   @db.Text
+
+    // Status / moderation
+    isActive    Boolean @default(true)
+    isVerified  Boolean @default(false)
+    isAvailable Boolean @default(true)
+    rating      Float   @default(0)
+    sortOrder   Int     @default(0)
+
+    // Nominee (one-to-one)
+    nominee DriverNominee?
+
+    // Audit fields
+    enterById   String
+    enterBy     User   @relation("DriverEnterBy", fields: [enterById], references: [id], onDelete: Restrict)
+    updatedById String
+    updatedBy   User   @relation("DriverUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    
+
+    @@index([enterById])
+    @@index([updatedById])
+    @@index([isActive, sortOrder])
+    @@index([phone])
+    @@index([nidNumber])
+    @@map("drivers")
+}
+
+model DriverNominee {
+    id       String @id @default(uuid())
+    driverId String @unique // one nominee per driver (per this model)
+    driver   Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+    nameBn      String  @db.VarChar(225)
+    nameEn      String  @db.VarChar(225)
+    relation    String  @db.VarChar(50) // e.g. "Father", "Spouse", "Brother"
+    phone       String? @db.VarChar(30)
+    nidNumber   String? @db.VarChar(50)
+    nidFrontUrl String? @db.Text
+    nidBackUrl  String? @db.Text
+    photoUrl    String? @db.Text
+    address     String? @db.Text
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([driverId])
+    @@map("driver_nominees")
+}
