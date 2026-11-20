@@ -2,7 +2,7 @@ model User {
     id            String    @id
     name          String
     nameBn        String?
-    email         String
+    email         String?
     emailVerified Boolean   @default(false)
     image         String?
     createdAt     DateTime  @default(now())
@@ -11,7 +11,7 @@ model User {
     accounts      Account[]
 
     role   UserRole @default(USER)
-    phone  String?
+    phone  String   @unique
     status String?  @default("ACTIVE")
 
     enteredVehicleTypes VehicleType[] @relation("VehicleTypeEnterBy")

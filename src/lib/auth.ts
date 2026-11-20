@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
-import nodemailer from "nodemailer"
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -20,35 +20,39 @@ export const auth = betterAuth({
   trustedOrigins: [process.env.APP_URL!],
   user: {
     additionalFields: {
-      role: {
+      nameBn: {
         type: "string",
-        defaultValue: "USER",
-        required: false
+        required: false,
       },
       phone: {
         type: "string",
-        required: false
+        required: false,
+      },
+      role: {
+        type: "string",
+        defaultValue: "USER",
+        required: false,
       },
       status: {
         type: "string",
         defaultValue: "ACTIVE",
-        required: false
-      }
-    }
+        required: false,
+      },
+    },
   },
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
-    requireEmailVerification: true
+    requireEmailVerification: true,
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: false,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }, request) => {
       try {
-        const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`
+        const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
         const info = await transporter.sendMail({
-          from: '"Prisma Blog" <prismablog@ph.com>',
+          from: '"Chalok Application" <prismablog@ph.com>',
           to: user.email,
           subject: "Please verify your email!",
           html: `<!DOCTYPE html>
@@ -169,23 +173,23 @@ export const auth = betterAuth({
 
       <p>
         Regards, <br />
-        <strong>Prisma Blog Team</strong>
+        <strong>Chalok Team</strong>
       </p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      © 2025 Prisma Blog. All rights reserved.
+      © 2025 Chalok Application. All rights reserved.
     </div>
   </div>
 </body>
 </html>
-`
+`,
         });
 
         console.log("Message sent:", info.messageId);
       } catch (err) {
-        console.error(err)
+        console.error(err);
         throw err;
       }
     },
@@ -200,7 +204,6 @@ export const auth = betterAuth({
     },
   },
 });
-
 
 //
 // GOOGLE_CLIENT_ID

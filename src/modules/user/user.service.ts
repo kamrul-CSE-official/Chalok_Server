@@ -1,15 +1,13 @@
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import { ConflictError } from "../../utils/errors";
-
-
-
+import { ConflictError, NotFoundError } from "../../utils/errors";
 
 interface ISignUpData {
-  f_name: string;
-  l_name: string;
+  name: string;
+  nameBn: string;
   email: string;
-  phone?: string;
+  image: string;
+  phone: string;
   password: string;
 }
 
@@ -25,12 +23,15 @@ const registerUser = async (data: ISignUpData, headers: any) => {
     );
   }
 
+  console.log("data: ", { ...data });
+
   const response = await auth.api.signUpEmail({
     body: {
-      email: data.email,
+      email: data.email ?? "",
       password: data.password,
-      name: `${data.f_name} ${data.l_name}`,
-      phone: data.phone || "",
+      name: data.name,
+      nameBn: data.nameBn,
+      phone: data.phone,
       role: "USER",
       status: "ACTIVE",
     },
@@ -43,3 +44,36 @@ const registerUser = async (data: ISignUpData, headers: any) => {
     data: response,
   };
 };
+
+const getAllUsers = async (key: string) => {
+  const data = await prisma.user.findMany();
+
+  return data;
+};
+
+const updateProfilePic = async (id: string, image: string) => {
+  const isExist = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+
+  if (!isExist) {
+    throw new NotFoundError("User not found!");
+  }
+
+  const result = await prisma.user.update({
+    where: { id },
+    data: {
+      image,
+    },
+  });
+
+  return result;
+};
+
+const UserService = {
+  registerUser,
+  getAllUsers,
+  updateProfilePic,
+};
+export default UserService;
