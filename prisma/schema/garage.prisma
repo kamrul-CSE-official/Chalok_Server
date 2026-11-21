@@ -4,7 +4,7 @@ model Garage {
     nameEn String @db.VarChar(225)
 
     // Optional but useful identifiers
-    slug        String  @unique @db.VarChar(225) // URL-friendly unique key, e.g. "dhaka-motors"
+    slug        String? @unique @db.VarChar(225) // URL-friendly unique key, e.g. "dhaka-motors"
     code        String? @unique @db.VarChar(50) // human-readable code, e.g. "GRG-001"
     phone       String? @db.VarChar(30) // contact number
     email       String? @db.VarChar(225) // contact email
@@ -17,14 +17,15 @@ model Garage {
     longitude Float?
 
     isActive   Boolean @default(true)
-    isVerified Boolean @default(false) 
+    isVerified Boolean @default(false)
     sortOrder  Int     @default(0)
 
     // Audit fields
-    enterById   String
-    enterBy     User   @relation("GarageEnterBy", fields: [enterById], references: [id], onDelete: Restrict)
-    updatedById String
-    updatedBy   User   @relation("GarageUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+    enterById       String
+    enterBy         User    @relation("GarageEnterBy", fields: [enterById], references: [id], onDelete: Restrict)
+    updatedById     String
+    updatedBy       User    @relation("GarageUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+    approvalRemarks String?
 
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
@@ -32,7 +33,7 @@ model Garage {
 
     @@index([enterById])
     @@index([updatedById])
-    @@index([isActive, sortOrder]) 
+    @@index([isActive, sortOrder])
     @@index([slug])
-    @@map("garages") 
+    @@map("garages")
 }

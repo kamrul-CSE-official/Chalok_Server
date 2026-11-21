@@ -6,8 +6,8 @@ import createUploadImage from "../../middlewares/createUploadImage";
 
 const router = express.Router();
 
-const uploadSingle = createUploadImage("./uploads/single");
-const uploadMultiple = createUploadImage("./uploads/multiple");
+const uploadSingle = createUploadImage("./uploads/user/single");
+const uploadMultiple = createUploadImage("./uploads/user/multiple");
 
 // 1. Auth Limiter: 3 attempts per 1 hour
 const authLimiter = createDynamicLimiter({
@@ -30,8 +30,35 @@ router.get(
 router.post(
   "/profile-pic",
   auth(),
+  authLimiter,
   uploadSingle.single("file"),
   UserController.updateProfilePic,
+);
+
+router.post(
+  "/garage-request",
+  auth(),
+  authLimiter,
+  uploadSingle.single("file"),
+  UserController.garageRequest,
+);
+router.patch(
+  "/garage-update/:garageId",
+  auth(),
+  uploadSingle.single("file"),
+  UserController.updateGarage,
+);
+
+router.get(
+  "/garage-request-list",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  UserController.garageReqList,
+);
+
+router.post(
+  "/garage-approve",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  UserController.garageApproval,
 );
 
 export const userRouter: Router = router;

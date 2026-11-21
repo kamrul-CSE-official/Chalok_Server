@@ -86,8 +86,143 @@ const updateProfilePic = async (
   }
 };
 
+const garageRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+
+    if (!user?.id) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: 401,
+        message: "Unauthorized - Login required",
+      });
+    }
+
+    const image = req.file;
+    if (image && image.path) {
+      req.body.logoUrl = image?.path;
+    }
+
+    if (req.body) {
+      const result = await UserService.garageRequest({
+        ...req.body,
+        enterById: user.id,
+      });
+
+      return sendOk(res, result, "Garage Request Send.");
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateGarage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+
+    if (!user?.id) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: 401,
+        message: "Unauthorized - Login required",
+      });
+    }
+
+    const image = req.file;
+    if (image && image.path) {
+      req.body.logoUrl = image?.path;
+    }
+
+    const { garageId } = req.params;
+
+    if (!garageId || !user?.id) {
+      throw new BadRequestError("Garage ID and updated by ID are required");
+    }
+
+    const result = await UserService.updateGarage(garageId, req.body, user?.id);
+
+    return sendOk(res, result, "Garage Request Send.");
+  } catch (error) {
+    next(error);
+  }
+};
+
+const garageReqList = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+
+    if (!user?.id) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: 401,
+        message: "Unauthorized - Login required",
+      });
+    }
+
+    const data = await UserService.garageReqList();
+
+    return sendOk(res, data, "Garage Request List.");
+  } catch (error) {
+    next(error);
+  }
+};
+const garageApproval = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+
+    if (!user?.id) {
+      return sendResponse(res, {
+        success: false,
+        statusCode: 401,
+        message: "Unauthorized - Login required",
+      });
+    }
+
+    const { garageId, isActive, approvalRemarks } = req.body;
+
+    if (!garageId) {
+      throw new BadRequestError("Garage ID and updated by ID are required");
+    }
+
+    const data = await UserService.garageApproval(
+      garageId,
+      isActive,
+      user.id,
+      approvalRemarks,
+    );
+
+    return sendOk(
+      res,
+      data,
+      `Garage ${isActive == 1 ? "Approved!" : "Rejected!"}`,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const UserController = {
   registerUser,
   getAllUsers,
   updateProfilePic,
+  garageRequest,
+  updateGarage,
+  garageReqList,
+  garageApproval,
 };
