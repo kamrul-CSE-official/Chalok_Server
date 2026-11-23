@@ -130,13 +130,13 @@ const getDriverByGarageId = async (
   next: NextFunction,
 ) => {
   try {
-    const { garageId } = req.params;
+    const { id } = req.params;
 
-    if (!garageId) {
+    if (!id) {
       throw new BadRequestError("Garage ID is required.");
     }
 
-    const result = await driverServices.getDriverByGarageId(garageId);
+    const result = await driverServices.getDriverByGarageId(id);
 
     return sendOk(res, result, "Garage drivers retrieved successfully.");
   } catch (error) {

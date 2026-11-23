@@ -108,6 +108,7 @@ const garageRequest = async (
     }
 
     if (req.body) {
+      console.log({ ...req.body });
       const result = await UserService.garageRequest({
         ...req.body,
         enterById: user.id,

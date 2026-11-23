@@ -60,7 +60,7 @@ router.get(
 
 // Get garage's drivers
 router.get(
-  "garage-drivers/:id",
+  "/garage-drivers/:id",
   auth(
     UserRole.ADMIN,
     UserRole.SUPER_ADMIN,

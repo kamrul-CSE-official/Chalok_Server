@@ -17,7 +17,7 @@ const vehicleTypeLimiter = createDynamicLimiter({
     "Too many vehicle type requests! Please wait 1 hour before trying again.",
 });
 
-// Create a new vehicle type (supports optional single file upload for iconKey)
+// Create a new vehicle type (supports optional single file upload for image)
 router.post(
   "/add-vehicle-type",
   auth(
