@@ -1,0 +1,143 @@
+// =====================================================
+// MENU & PERMISSION MODELS
+// =====================================================
+
+model Menu {
+    id       String  @id @default(cuid())
+    parentId String?
+    parent   Menu?   @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+    children Menu[]  @relation("MenuHierarchy")
+
+    code      String   @unique // stable identifier, e.g. "reports.sales"
+    label     String // display text / i18n key
+    labelBn   String? // Bangla label (matches your nameBn pattern)
+    icon      String?
+    routePath String? // "/reports/sales"
+    component String?
+    sortOrder Int      @default(0)
+    menuType  MenuType @default(PAGE)
+    isVisible Boolean  @default(true)
+    isActive  Boolean  @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    permissions MenuPermission[]
+    roleAccess  RoleMenuAccess[]
+    userAccess  UserMenuAccess[]
+
+    @@index([parentId])
+    @@index([code])
+    @@map("menu")
+}
+
+enum MenuType {
+    GROUP
+    PAGE
+    LINK
+    BUTTON
+}
+
+// =====================================================
+// PERMISSIONS
+// =====================================================
+
+model Permission {
+    id          String   @id @default(cuid())
+    code        String   @unique // e.g. "reports.sales.view"
+    description String?
+    createdAt   DateTime @default(now())
+
+    menus MenuPermission[]
+    roles RolePermission[]
+    users UserPermission[]
+
+    @@map("permission")
+}
+
+model MenuPermission {
+    menuId       String
+    menu         Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+    permissionId String
+    permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+    @@id([menuId, permissionId])
+    @@map("menu_permission")
+}
+
+// =====================================================
+// ROLE -> MENU ACCESS
+// =====================================================
+
+model RoleMenuAccess {
+    role   UserRole
+    menuId String
+    menu   Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+    canView   Boolean @default(true)
+    canCreate Boolean @default(false)
+    canEdit   Boolean @default(false)
+    canDelete Boolean @default(false)
+
+    grantedAt DateTime @default(now())
+
+    @@id([role, menuId])
+    @@map("role_menu_access")
+}
+
+// =====================================================
+// ROLE -> PERMISSION ACCESS
+// =====================================================
+
+model RolePermission {
+    role         UserRole
+    permissionId String
+    permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+    grantedAt DateTime @default(now())
+
+    @@id([role, permissionId])
+    @@map("role_permission")
+}
+
+// =====================================================
+// USER-SPECIFIC OVERRIDES
+// =====================================================
+
+model UserMenuAccess {
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    menuId String
+    menu   Menu   @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+    isAllowed Boolean @default(true) // false = explicit deny (overrides role)
+    canView   Boolean @default(true)
+    canCreate Boolean @default(false)
+    canEdit   Boolean @default(false)
+    canDelete Boolean @default(false)
+
+    expiresAt DateTime?
+
+    @@id([userId, menuId])
+    @@map("user_menu_access")
+}
+
+model UserPermission {
+    userId       String
+    user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    permissionId String
+    permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+    isAllowed Boolean   @default(true)
+    expiresAt DateTime?
+
+    @@id([userId, permissionId])
+    @@map("user_permission")
+}
+
+enum AuditTargetType {
+    USER
+    ROLE
+    MENU
+    PERMISSION
+}

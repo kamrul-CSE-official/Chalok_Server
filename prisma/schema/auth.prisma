@@ -24,6 +24,9 @@ model User {
     movementsOut        VehicleMovement[] @relation("MovementOutBy")
     movementsIn         VehicleMovement[] @relation("MovementInBy")
     movementsUpdated    VehicleMovement[] @relation("MovementUpdatedBy")
+    menuAccess          UserMenuAccess[]
+    permissionAccess    UserPermission[]
+    notifications       Notification[]
 
     @@unique([email])
     @@map("user")

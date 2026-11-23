@@ -1,0 +1,29 @@
+model Notification {
+    id String @id @default(cuid())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    title     String
+    titleBn   String?
+    message   String
+    messageBn String?
+
+    type   NotificationType @default(INFO)
+    link   String? // optional deep link, e.g. "/movements/123"
+    isRead Boolean          @default(false)
+    readAt DateTime?
+
+    createdAt DateTime @default(now())
+
+    @@index([userId, isRead])
+    @@index([userId, createdAt])
+    @@map("notification")
+}
+
+enum NotificationType {
+    INFO
+    SUCCESS
+    WARNING
+    ERROR
+}
