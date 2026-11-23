@@ -39,11 +39,14 @@ model Driver {
     enterBy     User   @relation("DriverEnterBy", fields: [enterById], references: [id], onDelete: Restrict)
     updatedById String
     updatedBy   User   @relation("DriverUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+    garageId    String
+    garageInfo  Garage @relation("DriverGarage", fields: [garageId], references: [id], onDelete: Restrict)
 
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
     deletedAt DateTime?
-    
+
+    movements VehicleMovement[] @relation("DriverMovements")
 
     @@index([enterById])
     @@index([updatedById])
@@ -62,7 +65,7 @@ model DriverNominee {
     nameEn      String  @db.VarChar(225)
     relation    String  @db.VarChar(50) // e.g. "Father", "Spouse", "Brother"
     phone       String? @db.VarChar(30)
-    nidNumber   String? @db.VarChar(50)
+    nidNumber   String? @unique @db.VarChar(50)
     nidFrontUrl String? @db.Text
     nidBackUrl  String? @db.Text
     photoUrl    String? @db.Text

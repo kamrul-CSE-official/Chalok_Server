@@ -14,13 +14,16 @@ model User {
     phone  String   @unique
     status String?  @default("ACTIVE")
 
-    enteredVehicleTypes VehicleType[] @relation("VehicleTypeEnterBy")
-    updatedVehicleTypes VehicleType[] @relation("VehicleTypeUpdatedBy")
-    enteredGarages      Garage[]      @relation("GarageEnterBy")
-    updatedGarages      Garage[]      @relation("GarageUpdatedBy")
-    enteredDrivers      Driver[]      @relation("DriverEnterBy")
-    updatedDrivers      Driver[]      @relation("DriverUpdatedBy")
-    uploadedAttachments Attachment[]  @relation("AttachmentUploadedBy")
+    enteredVehicleTypes VehicleType[]     @relation("VehicleTypeEnterBy")
+    updatedVehicleTypes VehicleType[]     @relation("VehicleTypeUpdatedBy")
+    enteredGarages      Garage[]          @relation("GarageEnterBy")
+    updatedGarages      Garage[]          @relation("GarageUpdatedBy")
+    enteredDrivers      Driver[]          @relation("DriverEnterBy")
+    updatedDrivers      Driver[]          @relation("DriverUpdatedBy")
+    uploadedAttachments Attachment[]      @relation("AttachmentUploadedBy")
+    movementsOut        VehicleMovement[] @relation("MovementOutBy")
+    movementsIn         VehicleMovement[] @relation("MovementInBy")
+    movementsUpdated    VehicleMovement[] @relation("MovementUpdatedBy")
 
     @@unique([email])
     @@map("user")

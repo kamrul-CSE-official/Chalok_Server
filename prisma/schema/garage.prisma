@@ -31,6 +31,10 @@ model Garage {
     updatedAt DateTime  @updatedAt
     deletedAt DateTime? // soft delete
 
+    drivers   Driver[]          @relation("DriverGarage")
+    vehicles  VehicleType[]     @relation("VehicleGarage")
+    movements VehicleMovement[] @relation("GarageMovements")
+
     @@index([enterById])
     @@index([updatedById])
     @@index([isActive, sortOrder])

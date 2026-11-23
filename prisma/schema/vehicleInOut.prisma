@@ -1,0 +1,63 @@
+enum MovementStatus {
+    OUT // Vehicle has left the garage (running / on trip)
+    IN // Vehicle has returned to the garage
+    CANCELLED // Entry voided
+}
+
+model VehicleMovement {
+    id       String  @id @default(uuid())
+    tripCode String? @unique @db.VarChar(50) // Optional readable log ID, e.g. "MOV-2026-0001"
+
+    // Core Relations
+    vehicleId String
+    vehicle   VehicleType @relation("VehicleMovements", fields: [vehicleId], references: [id], onDelete: Restrict)
+
+    driverId String
+    driver   Driver @relation("DriverMovements", fields: [driverId], references: [id], onDelete: Restrict)
+
+    garageId   String
+    garageInfo Garage @relation("GarageMovements", fields: [garageId], references: [id], onDelete: Restrict)
+
+    // Gate OUT Details
+    outTime      DateTime @default(now())
+    outOdometer  Float? // KM reading at exit
+    outFuelLevel String?  @db.VarChar(50) // e.g. "Full", "Half", "25%"
+    outCondition String?  @db.Text // Any pre-trip scratches/issues
+    outPhotoUrl  String?  @db.Text // Optional gate exit photo
+    purpose      String?  @db.VarChar(255) // e.g. "Passenger Trip", "Maintenance", "Delivery"
+    destination  String?  @db.Text
+    outRemarks   String?  @db.Text
+
+    // Gate IN Details (nullable until vehicle returns)
+    inTime      DateTime?
+    inOdometer  Float? // KM reading at return
+    inFuelLevel String?   @db.VarChar(50)
+    inCondition String?   @db.Text // Post-trip damage/condition notes
+    inPhotoUrl  String?   @db.Text // Optional gate return photo
+    inRemarks   String?   @db.Text
+
+    // Calculated & Status Fields
+    totalDistance Float? // Auto-calculated on IN: inOdometer - outOdometer
+    status        MovementStatus @default(OUT)
+
+    // Gatekeeper / Audit Fields
+    outRecordedById String
+    outRecordedBy   User   @relation("MovementOutBy", fields: [outRecordedById], references: [id], onDelete: Restrict)
+
+    inRecordedById String?
+    inRecordedBy   User?   @relation("MovementInBy", fields: [inRecordedById], references: [id], onDelete: Restrict)
+
+    updatedById String
+    updatedBy   User   @relation("MovementUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    @@index([garageId, status])
+    @@index([vehicleId, status])
+    @@index([driverId, status])
+    @@index([outTime])
+    @@index([inTime])
+    @@map("vehicle_movements")
+}
